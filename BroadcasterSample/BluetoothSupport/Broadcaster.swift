@@ -15,6 +15,7 @@ struct TransferService {
     static let serviceUUID = CBUUID(string: "6E400001-B5A3-F393-E0A9-E50E24DCCA9E")
 //    static let rxCharacteristicUUID = CBUUID(string: "6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
     static let txCharacteristicUUID = CBUUID(string: "6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
+    static let heartRateMeasurementUUID = CBUUID(string: "2A37")
 }
 
 enum BluetoothLECentralError: Error {
@@ -48,11 +49,12 @@ class Broadcaster: NSObject {
 //        let bytes = [0x1,0x2,0x3,0xA,0xB,0xC]
 //        let data = Data.init(bytes: bytes, count: bytes.count)
         let service = CBMutableService(type: TransferService.serviceUUID, primary: true)
-        let characteristic = CBMutableCharacteristic(type: TransferService.txCharacteristicUUID, properties: [.read, .notify], value: nil, permissions: [.readable])
-        service.characteristics = [characteristic]
+//        let characteristic = CBMutableCharacteristic(type: TransferService.txCharacteristicUUID, properties: [.read, .notify], value: nil, permissions: [.readable])
+        let heartRateMeasurementCharacteristic = CBMutableCharacteristic(type: TransferService.heartRateMeasurementUUID, properties: [.notify], value: nil, permissions: [.readable])
+        service.characteristics = [heartRateMeasurementCharacteristic]
         peripheralManager?.add(service)
         self.service = service
-        self.characteristic = characteristic
+        self.characteristic = heartRateMeasurementCharacteristic
     }
     
     private func cleanUp() {
@@ -67,6 +69,8 @@ class Broadcaster: NSObject {
         guard let peripheralManager = peripheralManager else {
             throw(BluetoothLECentralError.noPeripheral)
         }
+        
+//        peripheralManager.updateValue(heartRateMeasurementData, for: heartRateMeasurementCharacteristic, onSubscribedCentrals: nil)
         
         let success = peripheralManager.updateValue(data, for: characteristic, onSubscribedCentrals: nil)
         if success {
@@ -115,12 +119,16 @@ extension Broadcaster: CBPeripheralManagerDelegate {
         guard characteristic.uuid == TransferService.txCharacteristicUUID, let mutableCharacteristic = self.characteristic else { return }
         logger.log("characteristic: \(TransferService.txCharacteristicUUID) subscribed")
         
-        let data = "Initial value".data(using: .utf8)!
-        var msg = Data([MessageId.configureAndStart.rawValue])
-        msg.append(data)
+//        let data = "Initial value".data(using: .utf8)!
+//        var msg = Data([MessageId.configureAndStart.rawValue])
+//        msg.append(data)
+        
+        let heartRateValue: UInt16 = 60
+        let sensorContactStatus: UInt8 = 2 // "not supported"
+        let heartRateMeasurementData = Data([UInt8(heartRateValue & 0xFF), UInt8(heartRateValue >> 8), sensorContactStatus])
         
         do {
-            try sendData(msg, toCharacteristic: mutableCharacteristic)
+            try sendData(heartRateMeasurementData, toCharacteristic: mutableCharacteristic)
         } catch {
             print(error)
         }
