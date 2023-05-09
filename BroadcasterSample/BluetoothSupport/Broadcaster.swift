@@ -123,9 +123,20 @@ extension Broadcaster: CBPeripheralManagerDelegate {
 //        var msg = Data([MessageId.configureAndStart.rawValue])
 //        msg.append(data)
         
+        /*
         let heartRateValue: UInt16 = 60
         let sensorContactStatus: UInt8 = 2 // "not supported"
-        let heartRateMeasurementData = Data([UInt8(heartRateValue & 0xFF), UInt8(heartRateValue >> 8), sensorContactStatus])
+        let heartRateMeasurementData = Data([UInt8(heartRateValue & 0xFF), UInt8(heartRateValue >> 8), sensorContactStatus])*/
+        
+        // Heart Rate Measurement Value (16-bit unsigned integer)
+        let heartRateValue: UInt16 = 60
+        // Sensor Contact Status (bits 0-2)
+        let sensorContactStatus: UInt8 = 0b00000100 // "supported but contact is not detected"
+        // Energy Expended (8-bit unsigned integer)
+        let energyExpended: UInt8 = 0
+        // Heart Rate Measurement Data (16-bit HRM value + 8-bit Sensor Contact Status + 8-bit Energy Expended)
+        let heartRateMeasurementData = Data([UInt8(heartRateValue & 0xFF), UInt8(heartRateValue >> 8), sensorContactStatus, energyExpended])
+
         
         do {
             try sendData(heartRateMeasurementData, toCharacteristic: mutableCharacteristic)
