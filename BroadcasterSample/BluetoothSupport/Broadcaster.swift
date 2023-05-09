@@ -14,7 +14,7 @@ import os
 struct TransferService {
     static let serviceUUID = CBUUID(string: "6E400001-B5A3-F393-E0A9-E50E24DCCA9E")
 //    static let rxCharacteristicUUID = CBUUID(string: "6E400002-B5A3-F393-E0A9-E50E24DCCA9E")
-    static let txCharacteristicUUID = CBUUID(string: "6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
+//    static let txCharacteristicUUID = CBUUID(string: "6E400003-B5A3-F393-E0A9-E50E24DCCA9E")
     static let heartRateMeasurementUUID = CBUUID(string: "2A37")
 }
 
@@ -116,8 +116,8 @@ extension Broadcaster: CBPeripheralManagerDelegate {
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
-        guard characteristic.uuid == TransferService.txCharacteristicUUID, let mutableCharacteristic = self.characteristic else { return }
-        logger.log("characteristic: \(TransferService.txCharacteristicUUID) subscribed")
+        guard characteristic.uuid == TransferService.heartRateMeasurementUUID, let mutableCharacteristic = self.characteristic else { return }
+        logger.log("characteristic: \(characteristic.uuid) subscribed")
         
 //        let data = "Initial value".data(using: .utf8)!
 //        var msg = Data([MessageId.configureAndStart.rawValue])
@@ -135,8 +135,8 @@ extension Broadcaster: CBPeripheralManagerDelegate {
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didUnsubscribeFrom characteristic: CBCharacteristic) {
-        guard characteristic.uuid == TransferService.txCharacteristicUUID else { return }
-        logger.log("characteristic: \(TransferService.txCharacteristicUUID) unsubscribed")
+        guard characteristic.uuid == TransferService.heartRateMeasurementUUID else { return }
+        logger.log("characteristic: \(characteristic.uuid) unsubscribed")
     }
 }
     
